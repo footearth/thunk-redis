@@ -1,6 +1,6 @@
 thunk-redis
 ==========
-A redis client with pipelining, rely on thunks
+A redis client with pipelining, rely on thunks, support promise.
 
 [![NPM version][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
@@ -8,39 +8,71 @@ A redis client with pipelining, rely on thunks
 
 ## [thunks](https://github.com/thunks/thunks)
 
-## Demo
+## Demo([examples](https://github.com/zensh/thunk-redis/blob/master/examples))
+
+**default thunk API:**
 
 ```js
-var redis = require('thunk-redis'),
-  client = redis.createClient({
-    authPass: 'xxxxxx',
-    database: 1
-  });
+var redis = require('thunk-redis');
+var client = redis.createClient({
+  database: 0
+});
 
-client.on('connect', function () {
+client.on('connect', function() {
   console.log('redis connected!');
 });
 
-client.info('server')(function (error, res) {
-  console.log('redis server info: ', res);
-  console.log('redis client status: ', this.clientState());
+client.info('server')(function(error, res) {
+  console.log('redis server info:', res);
   return this.dbsize();
-})(function (error, res) {
-  console.log('surrent database size: ', res);
+})(function(error, res) {
+  console.log('surrent database size:', res);
   return this.select(0);
-})(function (error, res) {
-  console.log('select database 0: ', res);
-  console.log('redis client status: ', this.clientState());
-  this.clientEnd();
+})(function(error, res) {
+  console.log('select database 0:', res);
+  return this.quit();
+})(function(error, res) {
+  console.log('redis client quit:', res);
 });
 ```
 
+**use promise API:**
 ```js
-// with generator
+var redis = require('thunk-redis');
+var client = redis.createClient({
+  database: 1,
+  usePromise: true
+});
+
+client.on('connect', function() {
+  console.log('redis connected!');
+});
+
+client
+  .info('server')
+  .then(function(res) {
+    console.log('redis server info:', res);
+    return client.dbsize();
+  })
+  .then(function(res) {
+    console.log('surrent database size:', res);
+    return client.select(0);
+  })
+  .then(function(res) {
+    console.log('select database 0:', res);
+    return client.quit();
+  })
+  .then(function(res) {
+    console.log('redis client quit:', res);
+  });
+```
+
+**support generator in thunk API:**
+```js
 var redis = require('thunk-redis');
 var client = redis.createClient();
 
-client.select(1)(function* (error, res) {
+client.select(1)(function*(error, res) {
   console.log(error, res);
 
   yield this.set('foo', 'bar');
@@ -50,7 +82,7 @@ client.select(1)(function* (error, res) {
   console.log('bar -> %s', yield this.get('bar'));
 
   return this.quit();
-})(function (error, res) {
+})(function(error, res) {
   console.log(error, res);
 });
 ```
@@ -59,7 +91,9 @@ client.select(1)(function* (error, res) {
 
 **Node.js:**
 
-    npm install thunk-redis
+```bash
+npm install thunk-redis
+```
 
 ## API([More](https://github.com/zensh/thunk-redis/blob/master/API.md))
 
@@ -68,6 +102,45 @@ client.select(1)(function* (error, res) {
 3. redis.log([...])
 
 ### Options
+
+#### authPass
+
+*Optional*, Type: `String`, Default: `''`.
+
+
+#### database
+
+*Optional*, Type: `Number`, Default: `0`.
+
+
+#### returnBuffers
+
+*Optional*, Type: `Boolean`, Default: `false`.
+
+#### usePromise
+
+*Optional*, Type: `Boolean` or `Promise` constructor, Default: `false`.
+
+Export promise commands API.
+
+**Use default Promise:**
+```js
+var redis = require('thunk-redis');
+var client = redis.createClient({
+  database: 1,
+  usePromise: true
+});
+```
+
+**Use bluebird:**
+```js
+var redis = require('thunk-redis');
+var Bluebird = require('bluebird');
+var client = redis.createClient({
+  database: 1,
+  usePromise: Bluebird
+});
+```
 
 #### noDelay
 
@@ -103,20 +176,6 @@ When an idle timeout is triggered the socket will receive a 'timeout' event but 
 
 *Optional*, Type: `Number`, Default: `10000`.
 
-
-#### authPass
-
-*Optional*, Type: `String`, Default: `''`.
-
-
-#### database
-
-*Optional*, Type: `Number`, Default: `0`.
-
-
-#### returnBuffers
-
-*Optional*, Type: `Boolean`, Default: `false`.
 
 [npm-url]: https://npmjs.org/package/thunk-redis
 [npm-image]: http://img.shields.io/npm/v/thunk-redis.svg

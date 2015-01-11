@@ -1,13 +1,13 @@
 {
   "name": "thunk-redis",
-  "version": "0.3.7",
-  "description": "A redis client with pipelining, rely on thunks.",
+  "version": "0.5.0",
+  "description": "A redis client with pipelining, rely on thunks, support promise.",
   "main": "index.js",
   "authors": [
     "Yan Qing <admin@zensh.com>"
   ],
   "scripts": {
-    "test": "gulp test"
+    "test": "node --harmony `which gulp` test"
   },
   "repository": {
     "type": "git",
@@ -19,23 +19,26 @@
     "database",
     "thunk",
     "thunks",
-    "generator"
+    "generator",
+    "promise",
+    "pipelining"
   ],
   "engines": {
     "node": ">= 0.10.0"
   },
   "dependencies": {
-    "respjs": "^0.4.0",
+    "respjs": "^0.4.3",
     "thunks": "^2.7.0"
   },
   "devDependencies": {
+    "bluebird": "^2.6.2",
     "gulp": ">=3.8.0",
     "gulp-jshint": ">=1.8.4",
     "gulp-mocha": ">=1.0.0",
     "gulp-sequence": ">=0.3.0",
+    "jsonkit": ">=0.3.0",
     "mocha": ">=1.21.0",
-    "should": ">=4.0.4",
-    "jsonkit": ">=0.3.0"
+    "should": ">=4.0.4"
   },
   "license": "MIT",
   "bugs": {
