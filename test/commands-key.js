@@ -77,8 +77,7 @@ module.exports = function() {
     it('client.dump, client.restore', function(done) {
       var serializedValue;
       var client2 = redis.createClient({
-        returnBuffers: true,
-        debugMode: false
+        returnBuffers: true
       });
 
       client2.dump('dumpKey')(function(error, res) {
@@ -296,6 +295,7 @@ module.exports = function() {
         should(res).be.equal(0);
         return this.pexpire('key', 100);
       })(function(error, res) {
+        should(error).be.equal(null);
         should(res).be.equal(0);
       })(done);
     });

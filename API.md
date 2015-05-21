@@ -1,14 +1,13 @@
 thunk-redis API
 =====
-A redis client with pipelining, rely on thunks, support promise.
+A thunk/promise-based redis client, support all redis features.
 
 #### redis.createClient([port], [host], [options])
-#### redis.createClient([path], [options])
+#### redis.createClient([addressArray], [options])
 
 + port: `Number`, default: `6379`;
 + host: `String`, default: `'localhost'`;
 + options: `Object`, default: `{}`;
-+ path: `String`, default: `undefined`;
 
 Create a redis client, return the client.
 
@@ -16,9 +15,9 @@ Create a redis client, return the client.
 var client1 = redis.createClient();
 var client2 = redis.createClient({database: 2});
 var client3 = redis.createClient(6379, {database: 2});
-var client4 = redis.createClient(6379, '127.0.0.1', {database: 2});
-var client5 = redis.createClient('/tmp/redis.sock');
-var client6 = redis.createClient('/tmp/redis.sock', {database: 2});
+var client4 = redis.createClient('127.0.0.1:6379', {database: 2});
+var client5 = redis.createClient(6379, '127.0.0.1', {database: 2});
+var client6 = redis.createClient([7000, 7001, 7002], {authPass: 'authPassXXX'});
 ```
 
 #### redis.log([...])
@@ -28,14 +27,21 @@ var client = redis.createClient();
 client.info()(redis.log);
 ```
 
+#### redis.calcSlot(str)
+
+```js
+redis.calcSlot('123456789'); // => 12739
+redis.calcSlot(118); // => 13162
+```
+
 ## Events
 
-#### client.on('error', function (error) {})
-#### client.on('connect', function () {})
 #### client.on('close', function () {})
-#### client.on('end', function () {})
-#### client.on('drain', function () {})
-#### client.on('timeout', function () {})
+#### client.on('connect', function () {})
+#### client.on('connection', function (connection) {})
+#### client.on('warn', function (error) {})
+#### client.on('error', function (error) {})
+#### client.on('reconnecting', function (message) {})
 
 #### client.on('subscribe', function (pattern, n) {})
 #### client.on('unsubscribe', function (pattern, n) {})
@@ -43,13 +49,14 @@ client.info()(redis.log);
 #### client.on('punsubscribe', function (pattern, n) {})
 #### client.on('message', function (channel, message) {})
 #### client.on('pmessage', function (pattern, channel, message) {})
-#### client.on('monitor', function (message) {})  
+#### client.on('monitor', function (message) {})
 
 ## Others
 
 #### client.clientEnd()
 #### client.clientUnref()
 #### client.clientState()
+#### client.clientSwitch(redisId)
 
 #### client.clientCommands
 

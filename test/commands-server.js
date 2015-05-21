@@ -10,23 +10,17 @@ module.exports = function() {
     var client1, client2, client3, client4;
 
     beforeEach(function(done) {
-      client1 = redis.createClient({
-        debugMode: false
-      });
+      client1 = redis.createClient();
       client1.on('error', function(error) {
         console.error('redis client:', error);
       });
 
-      client2 = redis.createClient({
-        debugMode: false
-      });
+      client2 = redis.createClient();
       client2.on('error', function(error) {
         console.error('redis client:', error);
       });
 
-      client3 = redis.createClient({
-        debugMode: false
-      });
+      client3 = redis.createClient();
       client3.on('error', function(error) {
         console.error('redis client:', error);
       });
@@ -160,6 +154,33 @@ module.exports = function() {
       })(function(error, res) {
         should(error).be.equal(null);
         should(res[0] >= res[1].length).be.equal(true);
+      })(done);
+    });
+
+    it('client.command', function(done) {
+      var len = 0;
+      client1.command()(function(error, commands) {
+        should(error).be.equal(null);
+        len = commands.length;
+        return Thunk.all.call(this, commands.map(function(command) {
+          return client1.command('info', command[0])(function(error, res) {
+            should(error).be.equal(null);
+            should(res[0]).be.eql(command);
+            return command[0];
+          });
+        }))(function(error, res) {
+          should(error).be.equal(null);
+          should(res.length).be.equal(len);
+          res.unshift('info');
+          return this.command(res);
+        })(function(error, res) {
+          should(error).be.equal(null);
+          should(res).be.eql(commands);
+          return this.command('count');
+        });
+      })(function(error, res) {
+        should(error).be.equal(null);
+        should(res).be.equal(len);
       })(done);
     });
 
